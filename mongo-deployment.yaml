@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment
+  labels:
+    app: mongodb 
+spec:
+  selector:
+    matchLabels:
+      app: mongodb 
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 27017
+        environment:
+        - name: MONGO_INITDB_ROOT_USERNAME
+        valueFrom:
+            secretKeyRef:
+              key: MONGO_USER
+              optional: false
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: MONGO_PASSWORD
+              optional: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-deployment-express
+  labels:
+    app: mongodb-express
+spec:
+  selector:
+    matchLabels:
+      app: mongo-express
+  template:
+    metadata:
+      labels:
+        app: mongo-express
+    spec:
+      containers:
+      - name: mongo
+        image: mongo-express:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+        environment:
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              key: ME_CONFIG_MONGODB_ADMINUSERNAME
+              optional: false
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: ME_CONFIG_MONGODB_ADMINPASSWORD
+              optional: false
+        - name: ME_CONFIG_MONGODB_URL
+          valueFrom:
+            secretKeyRef:
+              key: ME_CONFIG_MONGODB_URL
+              optional: false
+
+
