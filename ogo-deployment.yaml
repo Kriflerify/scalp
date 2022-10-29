@@ -1,14 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ogo-deployment
+  name: ogo-dep
   labels:
     app: ogo 
 spec:
   selector:
     matchLabels:
       app: ogo 
-  replicas: 2
   template:
     metadata:
       labels:

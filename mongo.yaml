@@ -1,0 +1,112 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo-dep
+  labels:
+    app: mongo
+    mongo/part: front
+spec:
+  selector:
+    matchLabels:
+      app: mongodb 
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        mongo/part: front
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 27017
+          name: mongodb-port
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+                secretKeyRef:
+                  name: mongo-secrets
+                  key: MONGO_USER
+                  optional: false
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mongo-secrets
+                key: MONGO_PASSWORD
+                optional: false
+        volumeMounts:
+          - name: mongo-dev-drive
+            mountPath: /data
+      volumes:
+        - name: mongo-dev-drive
+          hostPath: 
+            path: /data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-svc
+  labels:
+    app: mongo
+spec:
+  selector:
+    app: mongodb
+    mongo/part: front
+  ports:
+  - name: db-port
+    port: 27018
+    targetPort: mongodb-port
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: me-dep
+  labels:
+    app: mongodb-express
+spec:
+  selector:
+    matchLabels:
+      app: mongodb-express
+  template:
+    metadata:
+      labels:
+        app: mongodb-express
+    spec:
+      containers:
+      - name: mongo-express
+        image: mongo-express:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8081
+        env:
+        - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secrets
+              key: MONGO_USER
+              optional: false
+        - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secrets
+              key: MONGO_PASSWORD
+              optional: false
+        - name: ME_CONFIG_MONGODB_SERVER
+          value: db-svc.default.svc.cluster.local
+        - name: ME_CONFIG_MONGODB_PORT
+          value: "27018"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: me-svc
+  labels:
+    app: mongodb-express
+spec:
+  type: NodePort
+  selector:
+    app: mongodb-express
+  ports:
+    - port: 8081
+      targetPort: 8081

@@ -1,3 +1,4 @@
 secrets.yaml
 *.swp
 .vscode/
+/data

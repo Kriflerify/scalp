@@ -27,5 +27,5 @@ if [[ $NEW_BUILD_DATE != $OLDBUILDDATE ]]; then
     fi
     kubectl wait deployments -l app=ogo --for=condition=Available=True --timeout=90s
 else
-    echo "NOT BUILDING"
+    echo "NOT BUILDING ogo because already built"
 fi

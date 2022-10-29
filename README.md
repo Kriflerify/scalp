@@ -8,3 +8,5 @@ Second terminal:
 ```
 ./run.sh
 ```
+## <3
+kubectl set image deployment/frontend www=image:v2
