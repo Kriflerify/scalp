@@ -1,0 +1,4 @@
+[submodule "ogo"]
+	path = ogo
+	url = ./ogo
+
